@@ -25,7 +25,7 @@ end
 Perstore.load = function(call_callback)
 	local data = private.plugin:load()
 
-	private.plugin:on_load(data, false, true)
+	private.plugin:on_load(data, false, call_callback)
 end
 
 return Perstore
