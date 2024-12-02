@@ -1,5 +1,7 @@
 local Stack = {}
 
+local se = require("perstore.serialize")
+
 function Stack.new()
 	return setmetatable({ data = {}, count = 0 }, { __index = Stack })
 end
@@ -36,6 +38,12 @@ end
 
 function Stack:size()
 	return self.count
+end
+
+function Stack:print()
+	for i = 0, self.count do
+		print(se(tostring(i), self.data[i]))
+	end
 end
 
 return Stack

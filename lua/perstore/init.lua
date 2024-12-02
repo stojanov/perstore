@@ -1,21 +1,23 @@
-local Plugin = require("Plugin")
+local plugin = require("perstore.plugin")
+
+local private = {
+	plugin = plugin.new(),
+}
 
 local Perstore = {}
-local private = {}
 
 Perstore.config = {
 	stores = {},
 }
 
-Perstore.setup = function(config)
-	_G.Perstore = Perstore
+Perstore.setup = function(opts)
+	opts = opts or {}
 
-	private.plugin = Plugin.new(config)
-	private.plugin:setup()
+	private.plugin:setup(opts)
 end
 
 Perstore.add_store = function(opts)
-	private.plugin:add_store(opts)
+	return private.plugin:add_store(opts)
 end
 
 Perstore.save = function()
@@ -27,5 +29,7 @@ Perstore.load = function(call_callback)
 
 	private.plugin:on_load(data, false, call_callback)
 end
+
+_G.Perstore = Perstore
 
 return Perstore

@@ -1,5 +1,6 @@
-local ser = require("serialize.init")
-local d = require("defines")
+local serialize = require("perstore.serialize")
+local deserialize = require("perstore.deserialize")
+local d = require("perstore.defines")
 
 local t = {
 	test = "woo",
@@ -25,20 +26,60 @@ local t = {
 	},
 }
 
-local serialized = ser.serialize("root", t)
+local serialized = serialize("root", t)
 
 function do_tables_match(a, b)
 	return table.concat(a) == table.concat(b)
 end
 
-print("SER")
-print(serialized)
+-- print("SER")
+-- print(serialized)
+--
+-- local deserialized = deserialize(serialized)
+--
+-- print(serialize("root", deserialized))
+--
+-- print("ORIGINAL")
+-- print(serialized)
+--
+-- print(do_tables_match(t, deserialized))
 
-local deserialized = ser.deserialize(serialized)
+local fileio = {
+	write = function(path, data)
+		local file = io.open(path, "w")
 
-print(ser.serialize("root", deserialized))
+		if file then
+			file:write(data)
+			file:close()
+			return true
+		else
+			return false
+		end
+	end,
 
-print("ORIGINAL")
-print(serialized)
+	read = function(path)
+		local file = io.open(path, "r")
 
-print(do_tables_match(t, deserialized))
+		if file then
+			local read = file:read("*all")
+			file:close()
+
+			-- read = vim.trim(read)
+
+			return read
+		else
+			return nil
+		end
+	end,
+}
+
+local read = fileio.read("./perstorea")
+
+print("FILE CONTENTS ")
+print(read)
+
+local object = deserialize(read)
+local got = serialize("root", object)
+
+print("GOT")
+print(got)

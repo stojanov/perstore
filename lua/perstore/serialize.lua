@@ -1,4 +1,4 @@
-local d = require("defines")
+local d = require("perstore.defines")
 
 local function create_indent(count)
 	local rtn = ""
@@ -56,7 +56,7 @@ local function serialize_table(t, offset)
 		end
 	end
 
-	return serialized
+	return serialized .. "\n"
 end
 
 local function serialize(name, v)

@@ -1,6 +1,6 @@
-local d = require("defines")
-local util = require("util")
-local stack = require("stack")
+local d = require("perstore.defines")
+local util = require("perstore.util")
+local stack = require("perstore.stack")
 
 local function parse_indent(buffer, pos)
 	local count = 0
@@ -25,30 +25,60 @@ local function try_number(input)
     local num = tonumber(input)
 
     if num ~= nil then
-        return num
+        return {
+            parsed = true,
+            value = num
+        }
+    else
+        return {
+            parsed = false,
+            value = input
+        }
     end
-
-    return input
 end
 
 local function try_boolean(input)
+    local value = true
+    local parsed = false
+
     if input == "true" or input == "1" then
-        return true
+        value = true
+        parsed = true
     else
         if input == "false" or input == "0" then
-            return false
+            value = false
+            parsed = true
         end
     end
 
-    return input
+    return {
+        value = value,
+        parsed = parsed
+    }
 end
 
 local function try_nil(input)
     if input == d.empty then
-        return ""
+        return {
+            parsed = true,
+            value = ""
+        }
     end
 
-    return input
+    return {
+        parsed = false,
+        value = input
+    }
+end
+
+local function apply_parse(func, input)
+    local o = func(input)
+
+    if o.parsed then
+        return o.value
+    else
+        return input
+    end
 end
 
 local function parse_line(input, pos, stck)
@@ -83,15 +113,15 @@ local function parse_line(input, pos, stck)
 
             if util.contains_value(buffer) ~= nil then
                 if #name == 0 then
-                    print("no name, invalid file")
+                    vim.notify("Perstore, invalid name, invalid config", vim.log.ERROR)
                     return -1
                 end
 
                 local value = buffer:gsub("%s+", "")
 
-                value = try_number(input)
-                value = try_nil(input)
-                value = try_boolean(input)
+                value = apply_parse(try_boolean, value)
+                value = apply_parse(try_number, value)
+                value = apply_parse(try_nil, value)
 
                 stck:peek().data[name] = value
 
